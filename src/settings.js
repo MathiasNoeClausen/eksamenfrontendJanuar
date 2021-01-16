@@ -1,1 +1,1 @@
-export const bookURL = "https://www.mathiasnoeclausen.dk/ca3/api/book/all";
+export const bookURL = "https://www.mathiasnoeclausen.dk/eksamen/api/book/";

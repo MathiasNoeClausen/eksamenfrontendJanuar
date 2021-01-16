@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from "react"
 import facade from "./apiFacade";
-import {bookURL} from "./settings.js"
+import bookFacade from "./bookFacade";
 //import 'bootstrap/dist/css/bootstrap.min.css';
 import './final.css';
 import './App.css';
@@ -9,12 +9,13 @@ import {
   Switch,
   Route,
   NavLink,
-  useLocation
+  useLocation,
+  useHistory
   
 } from "react-router-dom";
 
  
-const Content = (props) => {
+const Content = () => {
   return(
       <div>
       <div className="content">
@@ -26,7 +27,14 @@ const Content = (props) => {
           <AddBook />
         </Route>
         <Route path="/books">
-          <Books bookFacade={props.bookFacade} />
+          <Books />
+        </Route>
+        <Route path="/find-Book">
+        <FindBook />
+        </Route>
+        <Route path="/delete-book">
+          <DeleteBook />
+        
         </Route>
           <Route>
             <NoMatch/>
@@ -57,6 +65,9 @@ const Header = ({loggedIn}) => {
         <li>
           <NavLink activeClassName="active" to="/find-book">Find book</NavLink>
         </li>
+        <li>
+          <NavLink activeClassName="active" to="/delete-book">Delete book</NavLink>
+        </li>
         </React.Fragment>
         )}
       </ul>
@@ -74,44 +85,53 @@ function Home() {
   );
 }
 function AddBook() {
-
+let addBookData = bookFacade.AddBook();
   
 
   return (
 
-      
+      <div>
       <h2>Add book</h2>
-
-    
+      {addBookData}
+      </div>
   );
 }
 
 
 function Books() {
-      const URL = bookURL;
-      const [books, setBooks] = useState([{}]);
-            console.log("fetching")
-            fetch(URL, {headers: {'Accept': 'application/json'}})
-            .then(res => res.json())
-            .then(data => {
-                setBooks(data.all)
-                console.log(books);
-            })
+let bookData = bookFacade.GetBooks();
+  
+  return (
     
-    
-            
-            return (
-                <div>
-                    <ul>
-                        {books.map(book => (
-                  <li> {book.title}</li>  
-                        ))}
-                  </ul>
-                </div>
-                
-            )
-            
-        
+    <div>
+      <h2>All books</h2>
+      {bookData}
+    </div>
+  )
+
+
+}
+
+function FindBook() {
+  let findBookData = bookFacade.FindBookByTitle();
+
+  return (
+    <div>
+      <h2>Find book</h2>
+      {findBookData}
+    </div>
+  )
+}
+
+function DeleteBook() {
+let deleteBookData = bookFacade.DeleteBook();
+  return (
+    <div>
+      <h2>Delete book</h2>
+      {deleteBookData}
+    </div>
+  )
+
 }
 
 
@@ -151,7 +171,7 @@ function LogIn({ login }) {
       <form class="fadeIn second" onChange={onChange} >
         <input placeholder="User Name" class="form-control" id="username" />
         <br></br>
-        <div class="fadeIn third"><input placeholder="Password" class="form-control" id="password" /></div>
+        <div class="fadeIn third"><input type="password" placeholder="Password" class="form-control" id="password" /></div>
         <br></br>
         
         <br></br>
@@ -190,6 +210,7 @@ function LoggedIn() {
 function App(props) {
   const [loggedIn, setLoggedIn] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const history = useHistory();
 
  
 
@@ -198,6 +219,8 @@ function App(props) {
   const logout = () => {  
     facade.logout()
     setLoggedIn(false)
+    history.push("/")
+    history.go(0);
  } 
   const login = (user, pass) => { 
     facade.login(user, pass)
@@ -214,7 +237,7 @@ function App(props) {
 
     
     ;} 
-
+    if(loggedIn === false) {
   return (
     
     <div class="header">
@@ -241,16 +264,22 @@ function App(props) {
     </div>
 
   )
-  //if ({loggedIn}) {
-   // return (
-    //  <div class="header">
-    //  <Router>
-    //  <Header/>
-    //  <Content />
-    //  </Router>
-    //  </div>
-   // )
-  //  }
+        } else {
+          return (
+            <div class="header">
+              <Router>
+                <Header loggedIn={loggedIn} />
+                <Content bookFacade={props.bookFacade} />
+                <br></br>
+                <button class="btn btn-default" onClick={logout}>Logout</button>
+                
+                
+                </Router>
+                </div>
+                
+          )
+        
+        }
 
         }
 
